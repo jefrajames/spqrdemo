@@ -47,20 +47,19 @@ public class AuthContextFilter implements Filter {
             throws IOException, ServletException {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String authHeader = httpRequest.getHeader("Authorization");
 
-        User user = Optional.of(httpRequest)
+        Optional<User> user = Optional.of(httpRequest)
                 .map(req -> req.getHeader("Authorization"))
                 .filter(id -> !id.isEmpty())
                 .map(id -> id.replace("Bearer ", ""))
                 .map(userRepo::findById)
                 .orElse(null);
 
-        if (user == null) {
-            log.warning("Unauthenticated user, bad authorization token");
+        if (user==null || !user.isPresent()) {
+            log.warning("Unauthenticated user, bad authorization token, HTTP Authorization header=" + httpRequest.getHeader("Authorization"));
+        } else {
+            authContext.setUser(user.get());
         }
-
-        authContext.setUser(user);
 
         chain.doFilter(httpRequest, response);
     }
