@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * SigninPayload data provided after user signin.
+ * SigninPayload data returned on signin.
  * 
  * @author JF James
  */
