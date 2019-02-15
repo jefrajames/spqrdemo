@@ -18,6 +18,7 @@ package org.jefrajames.spqrdemo;
 import javax.inject.Inject;
 import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import java.util.Optional;
 import lombok.extern.java.Log;
 import org.jefrajames.spqrdemo.cdi.GraphQLComponent;
 
@@ -37,12 +38,12 @@ public class VoteResolver {
     private UserRepository userRepo;
 
     @GraphQLQuery
-    public User user(@GraphQLContext Vote vote) {
+    public Optional<User> user(@GraphQLContext Vote vote) {
         return userRepo.findById(vote.getUserId());
     }
 
     @GraphQLQuery
-    public Link link(@GraphQLContext Vote vote) {
+    public Optional<Link> link(@GraphQLContext Vote vote) {
         return linkRepo.findById(vote.getLinkId());
     }
 
