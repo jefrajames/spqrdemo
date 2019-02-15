@@ -15,86 +15,46 @@
  */
 package org.jefrajames.spqrdemo;
 
-import org.bson.Document;
 import org.bson.types.ObjectId;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import static com.mongodb.client.model.Filters.eq;
-import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.jnosql.artemis.document.DocumentTemplate;
+import org.jnosql.diana.api.document.DocumentQuery;
+import static org.jnosql.diana.api.document.query.DocumentQueryBuilder.select;
 
 /**
- * MongoDB repository for User entity.
- * 
+ * JNoSQL repository for User entity.
+ *
  * @author JF James
  */
-
 @ApplicationScoped
 public class UserRepository {
 
-	private MongoCollection<Document> users;
-	private MongoClient mongoClient;
+    private static final String COLLECTION = "users";
 
-	@PostConstruct
-	private void setUp() {
-		mongoClient = new MongoClient();
-		MongoDatabase mongo = mongoClient.getDatabase("hackernews");
-		users = mongo.getCollection("users");
-	}
+    @Inject
+    protected DocumentTemplate template;
 
-	@PreDestroy
-	public void shutdown() {
-		if (mongoClient != null)
-			mongoClient.close();
-	}
+    public List<User> findAll() {
+        DocumentQuery query = select().from(COLLECTION).build();
+        return template.select(query);
+    }
 
-	public User findByEmail(String email) {
-		Document doc = users.find(eq("email", email)).first();
-		return user(doc);
-	}
+    public User save(User user) {
+        return template.insert(user);
+    }
 
-	public User findById(String id) {
-		System.out.println("Calling UserRepository#findById, id=" + id);
-		try {
-			Document doc = users.find(eq("_id", new ObjectId(id))).first();
-			System.out.println("Mongo doc=" + doc);
-			return user(doc);
-		} catch (IllegalArgumentException e) {
-			// Authorization HTTP header may not be a proper Document id
-			return null;
-		}
+    public Optional<User> findByEmail(String email) {
+        DocumentQuery query = select().from(COLLECTION).where("email").eq(email).skip(0).limit(1).build();
+        List<User> users = template.select(query);
+        return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
+    }
 
-	}
-	
-	public List<User> findAll() {
-		List<User> allUsers = new ArrayList<>();
-		for (Document doc : users.find()) {
-			allUsers.add(user(doc));
-		}
-		return allUsers;
-	}
-
-	public User saveUser(User user) {
-		Document doc = new Document();
-		doc.append("name", user.getName());
-		doc.append("email", user.getEmail());
-		doc.append("password", user.getPassword());
-		users.insertOne(doc);
-		return new User(doc.get("_id").toString(), user.getName(), user.getEmail(), user.getPassword());
-	}
-
-	private User user(Document doc) {
-		if (doc == null) {
-			return null;
-		}
-		return new User(doc.get("_id").toString(), doc.getString("name"), doc.getString("email"),
-				doc.getString("password"));
-	}
-	
-
+    public Optional<User> findById(String id) {
+        DocumentQuery query = select().from(COLLECTION).where("_id").eq(new ObjectId(id)).build();
+        return template.singleResult(query);
+    }
 
 }
