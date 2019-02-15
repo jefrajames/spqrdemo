@@ -51,7 +51,7 @@ All that CDI magic is isolated in the cdi sub-package.
 
 ## JNoSQL integration
 I've decided to use [JNoSQL](http://www.jnosql.org/) to implement the repositories. 
-As mentioned in [my previous post](https://wordpress.com/view/jefrajames.wordpress.com), JNoSQL will be the basis for the first Jakarta EE specification.
+As mentioned in [my previous post](https://jefrajames.wordpress.com/2019/01/18/discovering-jnosql/), JNoSQL will be the basis for the first Jakarta EE specification.
 Mixing spqr and JNoSQL in a same project is an illustration of the future of Jakarta EE and MicroProfile.
 
 Using JNoSQL impacts:
@@ -88,7 +88,7 @@ The URLs to run the application are:
     
 Where [portnum] depends on the application server configuration. By default:
 * 8080 for **Payara**, **GlassFish**, **WildFly** and **TomEE**,
-* 9080 for **OpenLiberty**.
+* 9080 for **Open Liberty**.
 
 
 ### Creating a user
@@ -253,7 +253,7 @@ In that case, we want to retrieve the time stamp, the user name and the link des
 This project demonstrates how to integrate spqr with CDI and JNoSQL on a very simple use case. It is far from using all GraphQL subtleties (fragment, data loader, subscription ...), but it is a first and encouraging step : it works on all major Java EE 8 and MicroProfile platforms!
 
 The result seems promising but we do think that we can go a step forward in terms of integration and developer experience for real life projects.
-That's why we have proposed the MicroProfile GraphQL specification.
+That's why we have started the [MicroProfile GraphQL initiative](https://jefrajames.wordpress.com/2019/01/04/when-graphql-meets-microprofile/).
 We want to achieve something similar to JAX-RS with a high level of integration with Jakarta EE and MicroProfile.
  
 And, we are very happy [to have been approved to move to the MicroProfile sandbox for further development](https://microprofile.io/2019/02/12/eclipse-microprofile-2-2-is-now-available/).
