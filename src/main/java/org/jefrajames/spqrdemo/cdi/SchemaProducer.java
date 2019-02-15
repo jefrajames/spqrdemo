@@ -67,7 +67,6 @@ public class SchemaProducer {
     @PostConstruct
     private void createSchema() {
         generateSchemaFromConfig();
-        log.info("GraphQL schema created!");
     }
 
     @Produces
