@@ -15,78 +15,44 @@
  */
 package org.jefrajames.spqrdemo;
 
-import static com.mongodb.client.model.Filters.eq;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
-import org.bson.Document;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import javax.inject.Inject;
+import org.bson.types.ObjectId;
+import org.jnosql.artemis.document.DocumentTemplate;
+import org.jnosql.diana.api.document.DocumentQuery;
+import static org.jnosql.diana.api.document.query.DocumentQueryBuilder.select;
 
 /**
- * MongoDB repository for Vote entity.
+ * JNoSQL repository for Vote entity.
  *
  * @author JF James
  */
 @ApplicationScoped
 public class VoteRepository {
 
-    private MongoCollection<Document> votes;
-    private MongoClient mongoClient;
+    private static final String COLLECTION = "votes";
 
-    @PostConstruct
-    private void setUp() {
-        mongoClient = new MongoClient();
-        MongoDatabase mongo = mongoClient.getDatabase("hackernews");
-        votes = mongo.getCollection("votes");
-    }
-
-    @PreDestroy
-    public void shutdown() {
-        if (mongoClient != null) {
-            mongoClient.close();
-        }
-    }
+    @Inject
+    protected DocumentTemplate template;
 
     public List<Vote> findByUserId(String userId) {
-        List<Vote> list = new ArrayList<>();
-        for (Document doc : votes.find(eq("userId", userId))) {
-            list.add(vote(doc));
-        }
-        return list;
+        DocumentQuery query = select().from(COLLECTION).where("userId").eq(new ObjectId(userId)).build();
+        return template.select(query);
     }
 
     public List<Vote> findByLinkId(String linkId) {
-        List<Vote> list = new ArrayList<>();
-        for (Document doc : votes.find(eq("linkId", linkId))) {
-            list.add(vote(doc));
-        }
-        return list;
+        DocumentQuery query = select().from(COLLECTION).where("linkId").eq(new ObjectId(linkId)).build();
+        return template.select(query);
     }
 
     public List<Vote> findAll() {
-        List<Vote> allVotes = new ArrayList<>();
-        for (Document doc : votes.find()) {
-            allVotes.add(vote(doc));
-        }
-        return allVotes;
+        DocumentQuery query = select().from(COLLECTION).build();
+        return template.select(query);
     }
 
-    public Vote saveVote(Vote vote) {
-        Document doc = new Document();
-        doc.append("userId", vote.getUserId());
-        doc.append("linkId", vote.getLinkId());
-        doc.append("createdAt", Scalars.dateTime.getCoercing().serialize(vote.getCreatedAt()));
-        votes.insertOne(doc);
-        return new Vote(doc.get("_id").toString(), vote.getCreatedAt(), vote.getUserId(), vote.getLinkId());
+    public Vote save(Vote vote) {
+        return template.insert(vote);
     }
 
-    private Vote vote(Document doc) {
-        return new Vote(doc.get("_id").toString(), ZonedDateTime.parse(doc.getString("createdAt")),
-                doc.getString("userId"), doc.getString("linkId"));
-    }
 }
