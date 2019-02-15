@@ -17,7 +17,7 @@ package org.jefrajames.spqrdemo.cdi;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
@@ -47,7 +47,7 @@ public class GraphQLExtension implements Extension {
                 .addBean()
                 .types(GraphQLConfig.class)
                 .qualifiers(new AnnotationLiteral<Any>() {}, new AnnotationLiteral<Default>() {})
-                .scope(ApplicationScoped.class)
+                .scope(Dependent.class)
                 .name(GraphQLConfig.class.getName())
                 .beanClass(GraphQLConfig.class)
                 .createWith(creationalContext -> {
@@ -58,6 +58,7 @@ public class GraphQLExtension implements Extension {
 
     }
 
+    // Detect and store GraphQLcomponents
     <X> void detectGraphQLComponent(@Observes ProcessBean<X> event) {
         if (event.getAnnotated().isAnnotationPresent(GraphQLComponent.class)) {
             graphQLComponents.add(event.getBean());
