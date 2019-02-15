@@ -20,7 +20,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import org.jefrajames.spqrdemo.cdi.GraphQLComponent;
 
 /**
- * GraphQL resover to retrieve User data for SigninPayload
+ * GraphQL resolver to retrieve User data for SigninPayload
  * 
  * @author JF James
  */
