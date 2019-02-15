@@ -18,6 +18,9 @@ package org.jefrajames.spqrdemo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jnosql.artemis.Column;
+import org.jnosql.artemis.Entity;
+import org.jnosql.artemis.Id;
 
 /**
  * Link domain object (aka Entity).
@@ -27,14 +30,19 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity("links")
 public class Link {
 
+    @Id("_id")
     private String id;
 
+    @Column
     private String url;
 
+    @Column
     private String description;
 
+    @Column
     private String userId;
 
     public Link(String url, String description, String userId) {
