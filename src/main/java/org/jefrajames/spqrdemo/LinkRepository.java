@@ -15,71 +15,43 @@
  */
 package org.jefrajames.spqrdemo;
 
-import static com.mongodb.client.model.Filters.eq;
-
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 
-import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import java.util.Optional;
+import javax.inject.Inject;
+import org.jnosql.artemis.document.DocumentTemplate;
+import org.jnosql.diana.api.document.DocumentQuery;
+import static org.jnosql.diana.api.document.query.DocumentQueryBuilder.select;
 
 /**
- * MongoDB repository for the Link entity.
+ * JNoSQL repository for the Link entity.
  *
  * @author JF James
  */
 @ApplicationScoped
 public class LinkRepository {
 
-    private MongoCollection<Document> links;
-    private MongoClient mongoClient;
+    private static final String COLLECTION = "links";
 
-    @PostConstruct
-    private void setUp() {
-        mongoClient = new MongoClient();
-        MongoDatabase mongo = mongoClient.getDatabase("hackernews");
-        links = mongo.getCollection("links");
-    }
-
-    @PreDestroy
-    public void shutdown() {
-        if (mongoClient != null) {
-            mongoClient.close();
-        }
-    }
-
-    public Link findById(String id) {
-        Document doc = links.find(eq("_id", new ObjectId(id))).first();
-        return link(doc);
-    }
+    @Inject
+    protected DocumentTemplate template;
 
     public List<Link> findAll() {
-        List<Link> allLinks = new ArrayList<>();
-        for (Document doc : links.find()) {
-            allLinks.add(link(doc));
-        }
-        return allLinks;
+        DocumentQuery query = select().from(COLLECTION).build();
+        return template.select(query);
     }
 
-    public void saveLink(Link link) {
-        Document doc = new Document();
-        doc.append("url", link.getUrl());
-        doc.append("description", link.getDescription());
-        doc.append("postedBy", link.getUserId());
-        links.insertOne(doc);
+    public Optional<Link> findById(String id) {
+        DocumentQuery query = select().from(COLLECTION).where("_id").eq(new ObjectId(id)).build();
+        return template.singleResult(query);
     }
 
-    private Link link(Document doc) {
-        return new Link(doc.get("_id").toString(), doc.getString("url"), doc.getString("description"),
-                doc.getString("postedBy"));
+    public Link save(Link link) {
+        return template.insert(link);
     }
 
 }
