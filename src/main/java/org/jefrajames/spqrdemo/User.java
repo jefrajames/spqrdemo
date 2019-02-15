@@ -18,14 +18,18 @@ package org.jefrajames.spqrdemo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jnosql.artemis.Column;
+import org.jnosql.artemis.Entity;
+import org.jnosql.artemis.Id;
 
 /**
  * User domain object (aka Entity).
  * 
  * @author JF James
  */
+@Entity("users")
 @Data
-@NoArgsConstructor // Required by JNoSQL => no final attributes
+@NoArgsConstructor
 @AllArgsConstructor
 public class User {
 
@@ -33,13 +37,16 @@ public class User {
 		this(null, name, email, password);
 	}
 
-
+        @Id("_id")
 	private String id;
 	
+        @Column
 	private String name;
 	
+        @Column
 	private String email;
 	
+        @Column
 	private String password;
 
 }
