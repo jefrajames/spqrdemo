@@ -16,18 +16,31 @@
 package org.jefrajames.spqrdemo;
 
 import java.time.ZonedDateTime;
+import lombok.AllArgsConstructor;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.jnosql.artemis.Column;
+import org.jnosql.artemis.Entity;
+import org.jnosql.artemis.Id;
 
+@Entity("votes")
 @Data
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vote {
 
-    private final String id;
-    private final ZonedDateTime createdAt;
-    private final String userId; // Subject to Resolver
-    private final String linkId; // Subject to Resolver
+    @Id("_id")
+    private String id;
+    
+    @Column
+    private ZonedDateTime createdAt;
+    
+    @Column
+    private String userId; // Subject to Resolver
+    
+    @Column
+    private String linkId; // Subject to Resolver
 
     public Vote(ZonedDateTime createdAt, String userId, String linkId) {
         this(null, createdAt, userId, linkId);
