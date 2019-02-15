@@ -18,6 +18,7 @@ package org.jefrajames.spqrdemo;
 import javax.inject.Inject;
 import io.leangen.graphql.annotations.GraphQLContext;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import java.util.Optional;
 import org.jefrajames.spqrdemo.cdi.GraphQLComponent;
 
 /**
@@ -32,11 +33,7 @@ public class LinkResolver {
     private UserRepository userRepo;
 
     @GraphQLQuery
-    public User postedBy(@GraphQLContext Link link) {
-
-        if (link.getUserId() == null) // Authentication has failed!
-            return null;
-
+    public Optional<User> postedBy(@GraphQLContext Link link) {
         return userRepo.findById(link.getUserId());
     }
 
