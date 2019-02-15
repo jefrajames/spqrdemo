@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import graphql.GraphQLException;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
+import java.util.Optional;
 import lombok.extern.java.Log;
 import org.jefrajames.spqrdemo.cdi.GraphQLComponent;
 
@@ -51,35 +52,45 @@ public class Mutation {
             @GraphQLArgument(name = "description") String description) {
 
         if (authContext.getUser() == null) {
-            throw new GraphQLException("Authentication required");
+            throw new GraphQLException("Authentication required to create a Link");
         }
 
         Link newLink = new Link(url, description, authContext.getUser().getId());
-        linkRepo.saveLink(newLink);
-
-        return newLink;
+        return linkRepo.save(newLink);
     }
 
     @GraphQLMutation(name = "createUser", description = "Create a user")
     public User createUser(@GraphQLArgument(name = "name") String name,
             @GraphQLArgument(name = "authData") AuthData authData) {
         User newUser = new User(name, authData.getEmail(), authData.getPassword());
-        return userRepo.saveUser(newUser);
+        return userRepo.save(newUser);
     }
 
-    @GraphQLMutation(name = "signinUser", description = "Signin a user")
+    @GraphQLMutation(name = "signinUser", description = "Signin a created user")
     public SigninPayload signinUser(@GraphQLArgument(name = "authData") AuthData auth) throws IllegalAccessException {
-        User user = userRepo.findByEmail(auth.getEmail());
-        if (user.getPassword().equals(auth.getPassword())) {
-            return new SigninPayload(user.getId(), user);
+        Optional<User> user = userRepo.findByEmail(auth.getEmail());
+        if (user.isPresent() && user.get().getPassword().equals(auth.getPassword())) {
+            return new SigninPayload(user.get().getId(), user.get());
         }
+
         throw new GraphQLException("Invalid credentials");
     }
 
     @GraphQLMutation(name = "createVote", description = "Vote for a link")
-    public Vote createVote(@GraphQLArgument(name = "linkId") String linkId, @GraphQLArgument(name = "userId") String userId) {
+    public Vote createVote(@GraphQLArgument(name = "linkId") String linkId) {
+
+        if (authContext.getUser() == null) {
+            throw new GraphQLException("Authentication required to vote");
+        }
+
         ZonedDateTime now = Instant.now().atZone(ZoneOffset.UTC);
-        return voteRepo.saveVote(new Vote(now, userId, linkId));
+
+        if (!linkRepo.findById(linkId).isPresent()) {
+            throw new GraphQLException("Cannot vote for an inexistant link");
+        }
+
+        Vote newVote = new Vote(now, authContext.getUser().getId(), linkId);
+        return voteRepo.save(newVote);
     }
 
 }
